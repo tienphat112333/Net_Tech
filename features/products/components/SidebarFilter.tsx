@@ -34,7 +34,7 @@ const SidebarFilter = () => {
                   "flex h-5 w-5 items-center justify-center rounded-lg border",
                   activePrice === price
                     ? "bg-primary border-primary"
-                    : "border-gray-300 bg-white group-hover:border-[#0b5cce]/50",
+                    : "border-gray-300 bg-white group-hover:border-primary/50",
                 )}
                 onClick={() => setActivePrice(price)}
               />
@@ -92,7 +92,7 @@ const SidebarFilter = () => {
               key={cpu}
               className="group flex cursor-pointer flex-row items-center gap-3"
             >
-              <div className="flex h-5 w-5 items-center justify-center rounded-lg border border-gray-300 bg-white group-hover:border-[#0b5cce]/50" />
+              <div className="flex h-5 w-5 items-center justify-center rounded-lg border border-gray-300 bg-white group-hover:border-primary/50" />
               <span className="text-base text-gray-600 select-none group-hover:text-gray-900">
                 {cpu}
               </span>

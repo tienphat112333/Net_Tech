@@ -1,7 +1,7 @@
 import React from "react";
 import SidebarFilter from "@/features/products/components/SidebarFilter";
 import ProductSortBar from "@/features/products/components/ProductSortBar";
-import ProductCard from "@/features/products/components/ProductCard";
+import ProductCard from "@/components/shared/ProductCard";
 import { mockProducts } from "@/features/products/utils/mockData";
 
 const Products = () => {
