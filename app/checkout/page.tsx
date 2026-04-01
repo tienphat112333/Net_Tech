@@ -9,6 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { addressApi, UserAddress } from "@/features/address/api/addressApi";
+import { vietnamProvincesApi, VietnamProvince, VietnamDistrict, VietnamWard } from "@/features/address/api/vietnamProvincesApi";
 import { CHECKOUT_FEES } from "@/constants/checkout";
 import {
   checkoutSchema,
@@ -18,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Stepper } from "@/components/ui/stepper";
 import { Check } from "lucide-react";
+import { AddressModal } from "@/features/address/components/AddressModal";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -30,6 +33,15 @@ export default function CheckoutPage() {
     customer: CheckoutFormData;
     total: number;
   } | null>(null);
+
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState<UserAddress[]>([]);
+  const [selectedSavedAddrId, setSelectedSavedAddrId] = useState<string | undefined>();
+
+  // Dữ liệu API Hành chính
+  const [provinces, setProvinces] = useState<VietnamProvince[]>([]);
+  const [districts, setDistricts] = useState<VietnamDistrict[]>([]);
+  const [wards, setWards] = useState<VietnamWard[]>([]);
 
   // Hook-form
   const {
@@ -54,6 +66,13 @@ export default function CheckoutPage() {
     },
   });
 
+  const { onChange: onCityRegChange, ...restCityReg } = register("city");
+  const { onChange: onDistrictRegChange, ...restDistrictReg } = register("district");
+  const { onChange: onWardRegChange, ...restWardReg } = register("ward");
+
+  const selectedCity = watch("city");
+  const selectedDistrict = watch("district");
+  const selectedWard = watch("ward");
   const selectedPayment = watch("paymentMethod");
 
   useEffect(() => {
@@ -66,7 +85,39 @@ export default function CheckoutPage() {
       toast.warning("Giỏ hàng của bạn đang trống!");
       router.replace("/cart");
     }
+
+    // Tải mảng địa chỉ ngay khi mount
+    addressApi.getSavedAddresses().then(setSavedAddresses);
+    
+    // Tải danh sách tỉnh thành
+    vietnamProvincesApi.getProvinces().then(setProvinces);
   }, [router, isSuccess]);
+
+  // Load districts when city changes
+  useEffect(() => {
+    if (!selectedCity) return;
+    const normalizedSelectedCity = selectedCity.normalize("NFC");
+    const provinceId = provinces.find(p => p.name.normalize("NFC") === normalizedSelectedCity)?.code;
+    
+    if (provinceId) {
+      vietnamProvincesApi.getDistricts(provinceId).then(setDistricts);
+    } else {
+      setDistricts([]);
+    }
+  }, [selectedCity, provinces]);
+
+  // Load wards when district changes
+  useEffect(() => {
+    if (!selectedDistrict) return;
+    const normalizedSelectedDistrict = selectedDistrict.normalize("NFC");
+    const districtId = districts.find(d => d.name.normalize("NFC") === normalizedSelectedDistrict)?.code;
+
+    if (districtId) {
+      vietnamProvincesApi.getWards(districtId).then(setWards);
+    } else {
+      setWards([]);
+    }
+  }, [selectedDistrict, districts]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -86,22 +137,36 @@ export default function CheckoutPage() {
   const onSubmit = async (data: CheckoutFormData) => {
     await new Promise((resolve) => setTimeout(resolve, 1500)); // Fake API
     
+    // Nếu user tích chọn lưu địa chỉ, lưu xuống API qua LocalStorage mock
+    if (data.saveAddress) {
+      await addressApi.saveAddress({
+        fullName: data.fullName,
+        phone: data.phone,
+        city: data.city,
+        district: data.district,
+        ward: data.ward,
+        addressDetail: data.addressDetail,
+        isDefault: false
+      });
+      addressApi.getSavedAddresses().then(setSavedAddresses);
+    }
+
     const generatedOrderId = `#NT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const orderData = {
       orderId: generatedOrderId,
       customer: data,
       total: finalPrice,
     };
-    
+
     console.log("Order Data:", {
       order: items,
-      ...orderData
+      ...orderData,
     });
 
     toast.success("Đặt hàng thành công!", {
       autoClose: 3000,
     });
-    
+
     setOrderResult(orderData);
     setIsSuccess(true);
     clearCart();
@@ -120,94 +185,123 @@ export default function CheckoutPage() {
 
   if (isSuccess && orderResult) {
     return (
-      <main className="mx-auto min-h-[80vh] w-full max-w-360 bg-white px-4 py-8 md:px-8 lg:px-12 lg:py-10 xl:px-16 flex flex-col items-center">
+      <main className="mx-auto flex min-h-[80vh] w-full max-w-360 flex-col items-center bg-white px-4 py-8 md:px-8 lg:px-12 lg:py-10 xl:px-16">
         {/* Header Container */}
-        <div className="mb-12 w-full flex justify-end">
+        <div className="mb-12 flex w-full justify-end">
           <Stepper currentStep={3} />
         </div>
 
         {/* Success Icon */}
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 md:h-24 md:w-24">
-          <Check strokeWidth={3} className="h-10 w-10 text-green-500 md:h-12 md:w-12" />
+          <Check
+            strokeWidth={3}
+            className="h-10 w-10 text-green-500 md:h-12 md:w-12"
+          />
         </div>
 
         {/* Title */}
-        <h1 className="mb-3 text-2xl md:text-3xl font-black text-[#1cc55e] uppercase tracking-tight text-center">
+        <h1 className="mb-3 text-center text-2xl font-black tracking-tight text-[#1cc55e] uppercase md:text-3xl">
           Đặt hàng thành công!
         </h1>
-        <p className="mb-6 text-center text-sm md:text-base text-gray-700 font-bold">
+        <p className="mb-6 text-center text-sm font-bold text-gray-700 md:text-base">
           Cảm ơn bạn đã mua hàng tại NetTech. Đơn hàng của bạn đang được xử lý.
         </p>
 
         {/* Order ID Tag */}
-        <div className="mb-10 rounded-lg bg-gray-50/80 px-4 md:px-6 py-2 md:py-3 text-sm font-bold text-gray-500 shadow-sm border border-gray-100">
-          Mã đơn hàng: <span className="text-primary">{orderResult.orderId}</span>
+        <div className="mb-10 rounded-lg border border-gray-100 bg-gray-50/80 px-4 py-2 text-sm font-bold text-gray-500 shadow-sm md:px-6 md:py-3">
+          Mã đơn hàng:{" "}
+          <span className="text-primary">{orderResult.orderId}</span>
         </div>
 
         {/* Order Info Card */}
-        <div className="w-full max-w-[800px] overflow-hidden rounded-xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] text-sm md:text-base">
+        <div className="w-full max-w-200 overflow-hidden rounded-xl border border-gray-100 text-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] md:text-base">
           <div className="border-b border-gray-100 bg-gray-50/50 px-6 py-4">
             <h2 className="font-bold text-gray-900">Thông tin nhận hàng</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 md:gap-8">
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-semibold text-gray-500 mb-1">Người nhận:</p>
-                <p className="font-bold text-gray-900">{orderResult.customer.fullName}</p>
+                <p className="mb-1 text-xs font-semibold text-gray-500">
+                  Người nhận:
+                </p>
+                <p className="font-bold text-gray-900">
+                  {orderResult.customer.fullName}
+                </p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-500 mb-1">Số điện thoại:</p>
-                <p className="font-bold text-gray-900">{orderResult.customer.phone}</p>
+                <p className="mb-1 text-xs font-semibold text-gray-500">
+                  Số điện thoại:
+                </p>
+                <p className="font-bold text-gray-900">
+                  {orderResult.customer.phone}
+                </p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-500 mb-1">Địa chỉ giao hàng:</p>
-                <p className="font-bold text-gray-900 leading-snug">
-                  {orderResult.customer.addressDetail}, <br /> {orderResult.customer.ward}, {orderResult.customer.district}, {orderResult.customer.city}
+                <p className="mb-1 text-xs font-semibold text-gray-500">
+                  Địa chỉ giao hàng:
+                </p>
+                <p className="leading-snug font-bold text-gray-900">
+                  {orderResult.customer.addressDetail}, <br />{" "}
+                  {orderResult.customer.ward}, {orderResult.customer.district},{" "}
+                  {orderResult.customer.city}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col space-y-4 md:border-l md:border-dashed md:border-gray-200 md:pl-8">
               <div>
-                <p className="text-xs font-semibold text-gray-500 mb-1">Phương thức thanh toán:</p>
+                <p className="mb-1 text-xs font-semibold text-gray-500">
+                  Phương thức thanh toán:
+                </p>
                 <p className="font-bold text-gray-900">
-                  {orderResult.customer.paymentMethod === "COD" 
-                    ? "Thanh toán khi nhận hàng (COD)" 
-                    : orderResult.customer.paymentMethod === "VNPAY" 
-                      ? "Thanh toán qua VNPAY" 
+                  {orderResult.customer.paymentMethod === "COD"
+                    ? "Thanh toán khi nhận hàng (COD)"
+                    : orderResult.customer.paymentMethod === "VNPAY"
+                      ? "Thanh toán qua VNPAY"
                       : "Ví điện tử MOMO"}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-500 mb-1">Trạng thái thanh toán:</p>
+                <p className="mb-1 text-xs font-semibold text-gray-500">
+                  Trạng thái thanh toán:
+                </p>
                 <p className="font-bold text-orange-500">
-                  {orderResult.customer.paymentMethod === "COD" ? "Chờ thanh toán" : "Đã thanh toán (Chờ xác nhận)"}
+                  {orderResult.customer.paymentMethod === "COD"
+                    ? "Chờ thanh toán"
+                    : "Đã thanh toán (Chờ xác nhận)"}
                 </p>
               </div>
-              <div className="mt-auto pt-4 border-t border-dashed border-gray-100">
-                <p className="text-xs font-semibold text-gray-500 mb-1">Tổng thanh toán:</p>
-                <p className="text-2xl md:text-[28px] leading-none font-black text-destructive">
+              <div className="mt-auto border-t border-dashed border-gray-100 pt-4">
+                <p className="mb-1 text-xs font-semibold text-gray-500">
+                  Tổng thanh toán:
+                </p>
+                <p className="text-destructive text-2xl leading-none font-black md:text-[28px]">
                   {formatPrice(orderResult.total)}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#f0fcf4] px-6 py-4 text-xs md:text-sm text-[#0c8f49] border-t border-green-100/50">
-            <span className="font-bold">Lưu ý:</span><br className="md:hidden" /> NetTech sẽ gửi email xác nhận đơn hàng đến <span className="font-bold">{orderResult.customer.email || "email của bạn"}</span> trong ít phút nữa.
+          <div className="border-t border-green-100/50 bg-[#f0fcf4] px-6 py-4 text-xs text-[#0c8f49] md:text-sm">
+            <span className="font-bold">Lưu ý:</span>
+            <br className="md:hidden" /> NetTech sẽ gửi email xác nhận đơn hàng
+            đến{" "}
+            <span className="font-bold">
+              {orderResult.customer.email || "email của bạn"}
+            </span>{" "}
+            trong ít phút nữa.
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="mt-10 mb-10 flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link href={`/orders`}>
-            <Button className="w-full sm:w-auto min-w-[200px] h-12 rounded-full font-bold bg-primary text-white hover:bg-primary/90 text-sm shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all">
-              XEM ĐƠN HÀNG
-            </Button>
-          </Link>
+
           <Link href="/">
-            <Button variant="outline" className="w-full sm:w-auto min-w-[200px] h-12 rounded-full font-bold text-primary border-[2px] border-primary hover:bg-primary/5 text-sm transition-all">
+            <Button
+              variant="outline"
+              className="text-primary border-primary hover:bg-primary/5 h-12 w-full min-w-50 rounded-full border text-sm font-bold uppercase transition-all sm:w-auto"
+            >
               TIẾP TỤC MUA SẮM
             </Button>
           </Link>
@@ -223,7 +317,7 @@ export default function CheckoutPage() {
     <main className="mx-auto min-h-[80vh] w-full max-w-360 bg-white px-4 py-8 md:px-8 lg:px-12 lg:py-10 xl:px-16">
       {/* Header Container */}
       <div className="mb-10 flex flex-col items-start justify-between gap-4 border-b border-gray-100 pb-4 md:flex-row md:items-end">
-        <h1 className="text-3xl font-extrabold tracking-tight text-heading uppercase">
+        <h1 className="text-heading text-3xl font-extrabold tracking-tight uppercase">
           Thanh toán
         </h1>
 
@@ -246,6 +340,7 @@ export default function CheckoutPage() {
               <Button
                 type="button"
                 variant="link"
+                onClick={() => setIsAddressModalOpen(true)}
                 className="text-primary absolute top-4 right-4 px-2 text-sm font-semibold"
               >
                 Địa chỉ đã lưu
@@ -292,15 +387,21 @@ export default function CheckoutPage() {
                     Tỉnh / Thành phố *
                   </label>
                   <select
-                    {...register("city")}
+                    {...restCityReg}
+                    value={selectedCity || ""}
+                    onChange={(e) => {
+                      onCityRegChange(e);
+                      setValue("district", "");
+                      setValue("ward", "");
+                    }}
                     className={`${SelectStyle} ${errors.city ? "border-destructive text-destructive" : "text-gray-900"}`}
                   >
                     <option value="" disabled hidden>
                       Chọn Tỉnh/Thành
                     </option>
-                    <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                    <option value="Hà Nội">Hà Nội</option>
-                    <option value="Đà Nẵng">Đà Nẵng</option>
+                    {provinces.map(p => (
+                      <option key={p.code} value={p.name}>{p.name}</option>
+                    ))}
                   </select>
                   <ErrorMsg msg={errors.city?.message} />
                 </div>
@@ -309,15 +410,20 @@ export default function CheckoutPage() {
                     Quận / Huyện *
                   </label>
                   <select
-                    {...register("district")}
+                    {...restDistrictReg}
+                    value={selectedDistrict || ""}
+                    onChange={(e) => {
+                      onDistrictRegChange(e);
+                      setValue("ward", "");
+                    }}
                     className={`${SelectStyle} ${errors.district ? "border-destructive text-destructive" : "text-gray-900"}`}
                   >
                     <option value="" disabled hidden>
                       Chọn Quận/Huyện
                     </option>
-                    <option value="Quận 1">Quận 1</option>
-                    <option value="Quận 2">Quận Gò Vấp</option>
-                    <option value="Bình Thạnh">Bình Thạnh</option>
+                    {districts.map(d => (
+                      <option key={d.code} value={d.name}>{d.name}</option>
+                    ))}
                   </select>
                   <ErrorMsg msg={errors.district?.message} />
                 </div>
@@ -326,14 +432,19 @@ export default function CheckoutPage() {
                     Phường / Xã *
                   </label>
                   <select
-                    {...register("ward")}
+                    {...restWardReg}
+                    value={selectedWard || ""}
+                    onChange={(e) => {
+                      onWardRegChange(e);
+                    }}
                     className={`${SelectStyle} ${errors.ward ? "border-destructive text-destructive" : "text-gray-900"}`}
                   >
                     <option value="" disabled hidden>
                       Chọn Phường/Xã
                     </option>
-                    <option value="Phường Bến Nghé">Phường Bến Nghé</option>
-                    <option value="Phường 5">Phường 5</option>
+                    {wards.map(w => (
+                      <option key={w.code} value={w.name}>{w.name}</option>
+                    ))}
                   </select>
                   <ErrorMsg msg={errors.ward?.message} />
                 </div>
@@ -420,13 +531,11 @@ export default function CheckoutPage() {
                       <span className="text-sm font-bold text-gray-900">
                         Thanh toán qua VNPAY
                       </span>
-                      <span className="text-xs font-bold text-success">
+                      <span className="text-success text-xs font-bold">
                         Giảm thêm 300k
                       </span>
                     </div>
-                    <span className="text-xs font-black text-vnpay">
-                      VNPAY
-                    </span>
+                    <span className="text-vnpay text-xs font-black">VNPAY</span>
                   </div>
                 </label>
 
@@ -446,9 +555,7 @@ export default function CheckoutPage() {
                     <span className="text-sm font-bold text-gray-900">
                       Ví điện tử Momo
                     </span>
-                    <span className="text-xs font-black text-momo">
-                      MOMO
-                    </span>
+                    <span className="text-momo text-xs font-black">MOMO</span>
                   </div>
                 </label>
               </div>
@@ -506,7 +613,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-base">
                 <span className="font-medium text-gray-600">Giảm giá:</span>
-                <span className="font-bold text-success">
+                <span className="text-success font-bold">
                   {VNPAY_DISCOUNT > 0
                     ? `- ${formatPrice(VNPAY_DISCOUNT)}`
                     : "- 0đ"}
@@ -524,7 +631,7 @@ export default function CheckoutPage() {
                   (Đã bao gồm VAT)
                 </span>
               </div>
-              <div className="text-2xl font-black tracking-tight text-destructive">
+              <div className="text-destructive text-2xl font-black tracking-tight">
                 {formatPrice(finalPrice)}
               </div>
             </div>
@@ -533,7 +640,7 @@ export default function CheckoutPage() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-14 w-full rounded-lg bg-destructive text-lg font-bold text-white shadow-lg shadow-destructive/20 transition-all hover:bg-destructive/90 active:scale-[0.98]"
+              className="bg-destructive shadow-destructive/20 hover:bg-destructive/90 h-14 w-full rounded-lg text-lg font-bold text-white shadow-lg transition-all active:scale-[0.98]"
             >
               {isSubmitting ? "ĐANG XỬ LÝ..." : "ĐẶT HÀNG"}
             </Button>
@@ -550,6 +657,23 @@ export default function CheckoutPage() {
           </div>
         </div>
       </form>
+
+      <AddressModal
+        isOpen={isAddressModalOpen}
+        onClose={() => setIsAddressModalOpen(false)}
+        addresses={savedAddresses}
+        selectedId={selectedSavedAddrId}
+        onSelect={(addr) => {
+          setSelectedSavedAddrId(addr.id);
+          setValue("fullName", addr.fullName, { shouldValidate: true });
+          setValue("phone", addr.phone, { shouldValidate: true });
+          setValue("city", addr.city, { shouldValidate: true });
+          setValue("district", addr.district, { shouldValidate: true });
+          setValue("ward", addr.ward, { shouldValidate: true });
+          setValue("addressDetail", addr.addressDetail, { shouldValidate: true });
+          setIsAddressModalOpen(false);
+        }}
+      />
     </main>
   );
 }
