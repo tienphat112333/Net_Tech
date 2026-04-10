@@ -1,5 +1,6 @@
 import http from "@/lib/axios";
 import { Product } from "@/features/products/utils/mockData";
+import { DetailedProduct } from "@/features/products/utils/mockProductDetail";
 import mockAvt from "@/public/images/pink.jpg";
 
 // Mapping tạm thời id category bên backend sang slug cho FE
@@ -50,5 +51,36 @@ export const getProducts = async (): Promise<Product[]> => {
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
+  }
+};
+
+export const getProductById = async (id: string): Promise<DetailedProduct | null> => {
+  try {
+    const response = await http.get(`/products/${id}`);
+    const item = response.data; // Giả sử Backend trả thẳng object product ở root data
+
+    if (!item) return null;
+
+    const basePrice = item.price || item.basePrice || 0;
+
+    return {
+      id: item._id || item.id,
+      name: item.name,
+      sku: item.sku || "N/A",
+      availability: (item.totalStock && item.totalStock > 0) ? "In Stock" : "Out of Stock",
+      basePrice,
+      originalPrice: item.basePrice ? basePrice * 1.05 : null,
+      discount: null,
+      images: item.images?.length ? item.images : [mockAvt],
+      configurations: item.configurations?.length 
+        ? item.configurations 
+        : [{ id: "default", name: "Mặc định", priceDelta: 0 }],
+      features: item.features || [],
+      specs: item.specifications || {},
+      highlights: item.shortHighlights || [],
+    };
+  } catch (error) {
+    console.error(`Error fetching product ID ${id}:`, error);
+    return null;
   }
 };
