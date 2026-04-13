@@ -11,6 +11,17 @@ const http = axios.create({
 });
 
 // Bạn có thể chêm thêm các Interceptor ở đây sau (như tự động gắn Token)
-// http.interceptors.request.use(...)
+http.interceptors.request.use((config) => {
+  // Chỉ chạy trên client side vì localStorage không có trên server
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 export default http;
