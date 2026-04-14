@@ -3,12 +3,12 @@ import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { DetailedProduct, ProductConfig } from "@/features/products/utils/mockProductDetail";
+import { DetailedProduct, ProductConfig } from "@/features/storefront/products/utils/mockProductDetail";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { cartApi } from "@/features/cart/api/cartApi";
+import { cartApi } from "@/features/storefront/cart/api/cartApi";
 
 export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
   const [activeConfig, setActiveConfig] = useState<ProductConfig>(product.configurations[0]);

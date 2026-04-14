@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { DetailedProduct } from "@/features/products/utils/mockProductDetail";
+import { DetailedProduct } from "@/features/storefront/products/utils/mockProductDetail";
 
 export const ProductGallery = ({ product }: { product: DetailedProduct }) => {
   const [activeIndex, setActiveIndex] = useState(0);

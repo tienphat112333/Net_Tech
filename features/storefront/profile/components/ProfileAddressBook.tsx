@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { addressApi, UserAddress } from "@/features/address/api/addressApi";
-import { AddressFormModal } from "@/features/address/components/AddressFormModal";
+import { addressApi, UserAddress } from "@/features/storefront/address/api/addressApi";
+import { AddressFormModal } from "@/features/storefront/address/components/AddressFormModal";
 import { Button } from "@/components/ui/button";
 
 export const ProfileAddressBook = () => {

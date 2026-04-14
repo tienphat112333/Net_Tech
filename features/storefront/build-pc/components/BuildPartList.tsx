@@ -2,7 +2,7 @@
 
 import React from "react";
 import { BuildPartItem } from "./BuildPartItem";
-import { mockProducts } from "@/features/products/utils/mockData";
+import { mockProducts } from "@/features/storefront/products/utils/mockData";
 
 export const BuildPartList = () => {
   // Hardcoded mock state as requested to match UI

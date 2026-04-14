@@ -1,6 +1,6 @@
 import http from "@/lib/axios";
-import { Product } from "@/features/products/utils/mockData";
-import { DetailedProduct } from "@/features/products/utils/mockProductDetail";
+import { Product } from "@/features/storefront/products/utils/mockData";
+import { DetailedProduct } from "@/features/storefront/products/utils/mockProductDetail";
 import mockAvt from "@/public/images/pink.jpg";
 
 // Mapping tạm thời id category bên backend sang slug cho FE

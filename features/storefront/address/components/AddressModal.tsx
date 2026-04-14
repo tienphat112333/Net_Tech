@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UserAddress } from "@/features/address/api/addressApi";
+import { UserAddress } from "@/features/storefront/address/api/addressApi";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

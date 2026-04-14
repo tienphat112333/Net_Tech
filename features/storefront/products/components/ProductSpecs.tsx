@@ -1,4 +1,4 @@
-import { DetailedProduct } from "@/features/products/utils/mockProductDetail";
+import { DetailedProduct } from "@/features/storefront/products/utils/mockProductDetail";
 
 export const ProductSpecs = ({ specs }: { specs: DetailedProduct["specs"] }) => {
   return (
