@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ProductFormGeneral } from "@/features/super-admin/products/components/create/ProductFormGeneral";
 import { ProductFormPricing } from "@/features/super-admin/products/components/create/ProductFormPricing";
@@ -26,9 +27,9 @@ export default function CreateProductPage() {
           >
             HỦY
           </Link>
-          <button className="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors">
+          <Button className="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors">
             LƯU SẢN PHẨM
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -67,9 +67,9 @@ export function AddressFormModal({ isOpen, onClose, onSave, initialData }: Addre
           <h2 className="text-lg font-bold text-gray-900">
             {initialData ? "Cập nhật địa chỉ" : "Thêm địa chỉ mới"}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+          <Button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Body */}

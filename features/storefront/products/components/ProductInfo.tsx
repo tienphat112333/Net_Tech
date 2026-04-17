@@ -102,7 +102,7 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
         <h3 className="text-base font-bold text-gray-900">Cấu hình đang chọn:</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {product.configurations.map((config) => (
-            <button
+            <Button
               key={config.id}
               onClick={() => setActiveConfig(config)}
               className={cn(
@@ -129,7 +129,7 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
                   + {formatPrice(config.priceDelta)}
                 </span>
               )}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

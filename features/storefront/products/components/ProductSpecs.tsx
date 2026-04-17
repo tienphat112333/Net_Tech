@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { DetailedProduct } from "@/features/storefront/products/utils/mockProductDetail";
 
 export const ProductSpecs = ({ specs }: { specs: DetailedProduct["specs"] }) => {
@@ -19,9 +20,9 @@ export const ProductSpecs = ({ specs }: { specs: DetailedProduct["specs"] }) => 
       </div>
 
       <div className="mt-6 flex justify-center">
-        <button className="rounded-full border border-primary px-8 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-primary/5 focus:outline-none">
+        <Button className="rounded-full border border-primary px-8 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-primary/5 focus:outline-none">
           XEM CẤU HÌNH CHI TIẾT
-        </button>
+        </Button>
       </div>
     </div>
   );

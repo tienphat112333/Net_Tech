@@ -10,6 +10,7 @@ interface StatCardProps {
   icon: React.ReactNode;
   iconBgColor: string;
   iconColor: string;
+  valueColor?: string;
 }
 
 export function StatCard({
@@ -20,6 +21,7 @@ export function StatCard({
   icon,
   iconBgColor,
   iconColor,
+  valueColor = "text-foreground",
 }: StatCardProps) {
   return (
     <Card className="shadow-sm border-none">
@@ -38,8 +40,9 @@ export function StatCard({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="mt-2 flex items-center text-xs">
+        <div className={cn("text-3xl font-bold", valueColor)}>{value}</div>
+        {trendText && (
+          <p className="mt-2 flex items-center text-xs">
           {trend === "up" && (
             <span className="flex items-center text-green-600 font-medium">
               <ArrowUp className="mr-1 h-3 w-3" />
@@ -56,6 +59,7 @@ export function StatCard({
             <span className="text-muted-foreground">{trendText}</span>
           )}
         </p>
+        )}
       </CardContent>
     </Card>
   );

@@ -92,12 +92,12 @@ export const ProfileAddressBook = () => {
               {/* Actions Right */}
               <div className="flex flex-col md:items-end gap-3 mt-2 md:mt-0 md:w-32 shrink-0">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => handleOpenEdit(addr)} className="text-[14px] font-medium text-primary hover:underline">
+                  <Button onClick={() => handleOpenEdit(addr)} className="text-[14px] font-medium text-primary hover:underline">
                     Cập nhật
-                  </button>
-                  <button onClick={() => handleDelete(addr.id)} className="text-[14px] font-medium text-destructive hover:underline">
+                  </Button>
+                  <Button onClick={() => handleDelete(addr.id)} className="text-[14px] font-medium text-destructive hover:underline">
                     Xóa
-                  </button>
+                  </Button>
                 </div>
 
                 {!addr.isDefault && (

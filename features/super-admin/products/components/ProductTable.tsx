@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Pencil, Trash2, Loader2 } from "lucide-react";
@@ -112,12 +114,12 @@ export function ProductTable() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors">
+                        <Button className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors">
                           <Pencil className="h-4 w-4" />
-                        </button>
-                        <button className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+                        </Button>
+                        <Button className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors">
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>

@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Search, ChevronDown } from "lucide-react";
 
 export function ProductFilterBar() {
@@ -5,7 +6,7 @@ export function ProductFilterBar() {
     <div className="flex flex-col gap-4 rounded-xl bg-white p-4 shadow-sm md:flex-row md:items-center">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        <input
+        <Input
           type="text"
           placeholder="Tìm theo tên, SKU..."
           className="w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"

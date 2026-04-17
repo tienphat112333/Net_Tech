@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Sparkles, ChevronDown } from "lucide-react";
 
 export function ProductFormSpecs() {
@@ -25,7 +27,7 @@ export function ProductFormSpecs() {
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-slate-700">TDP (Công suất nhiệt - W)</label>
-          <input
+          <Input
             type="text"
             placeholder="125"
             className="w-full rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -35,21 +37,21 @@ export function ProductFormSpecs() {
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-slate-700">Hỗ trợ RAM</label>
           <div className="flex gap-2">
-            <button className="rounded-md border border-blue-500 bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-600 focus:outline-none">
+            <Button className="rounded-md border border-blue-500 bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-600 focus:outline-none">
               DDR5
-            </button>
-            <button className="rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 focus:outline-none">
+            </Button>
+            <Button className="rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 focus:outline-none">
               DDR4
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-slate-700">Có iGPU (Đồ họa tích hợp)?</label>
           <div className="flex items-center gap-2">
-            <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-green-500 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+            <Button className="relative inline-flex h-6 w-11 items-center rounded-full bg-green-500 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
               <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition-transform" />
-            </button>
+            </Button>
             <span className="text-sm font-semibold text-green-600">Có</span>
           </div>
         </div>
