@@ -9,6 +9,8 @@ export interface Product {
   discount: string | null;
   image: any;
   categorySlug: string;
+  sku?: string;
+  totalStock?: number;
   
   // Dynamic filter fields matching SidebarFilter
   brand?: string;

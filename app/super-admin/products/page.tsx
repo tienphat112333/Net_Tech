@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useEffect } from "react";
 import { Package, AlertTriangle, Settings, Check } from "lucide-react";
 import { toast } from "react-toastify";
@@ -34,9 +34,9 @@ export default function SuperAdminProductsPage() {
         <h1 className="text-2xl font-bold text-slate-800">
           Danh sách sản phẩm (Master Data)
         </h1>
-        <button className="text-sm font-semibold text-slate-400 hover:text-slate-600 transition-colors">
+        <Link href="/super-admin/products/create" className="text-sm font-semibold text-slate-400 hover:text-slate-600 transition-colors">
           + THÊM SẢN PHẨM
-        </button>
+        </Link>
       </div>
 
       {/* Cards Row */}
